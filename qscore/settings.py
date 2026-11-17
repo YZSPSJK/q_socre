@@ -22,8 +22,8 @@ ALLOWED_HOSTS = os.getenv("QSCORE_ALLOWED_HOSTS", "localhost,127.0.0.1").split("
 CSRF_TRUSTED_ORIGINS = os.getenv("QSCORE_TRUSTED_ORIGINS", "").split(",") if os.getenv(
     "QSCORE_TRUSTED_ORIGINS"
 ) else []
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = os.getenv("QSCORE_COOKIE_SECURE", "0" if DEBUG else "1") == "1"
+CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
 
 INSTALLED_APPS = [
     "qscore.apps.AccountAdminConfig",
@@ -43,6 +43,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+if os.getenv("QSCORE_SERVE_STATIC") == "1":
+    MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 ROOT_URLCONF = "qscore.urls"
 TEMPLATES = [{
     "BACKEND": "django.template.backends.django.DjangoTemplates",

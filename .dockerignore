@@ -1,0 +1,11 @@
+**
+!Dockerfile
+!requirements.txt
+!manage.py
+!start.sh
+!qscore/
+!qscore/**
+!ratings/
+!ratings/**
+**/__pycache__/
+**/*.py[cod]

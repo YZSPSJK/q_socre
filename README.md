@@ -50,6 +50,29 @@ cp qscore.example.toml qscore.local.toml
 
 使用刚创建的管理员账号登录。[打开本地工作台](http://127.0.0.1:8000/)
 
+## 用 Docker 启动
+
+准备好 `qscore.local.toml` 后，在项目目录构建镜像。容器需要能访问 MySQL，数据库地址应填写容器可访问的地址。
+
+```bash
+docker build -t qscore:dev .
+docker run -d --name qscore-dev \
+  --user "$(id -u):$(id -g)" \
+  -p 127.0.0.1:18080:8000 \
+  --mount "type=bind,source=$PWD/qscore.local.toml,target=/run/qscore/config.toml,readonly" \
+  -e QSCORE_CONFIG=/run/qscore/config.toml \
+  -e QSCORE_COOKIE_SECURE=0 \
+  qscore:dev
+```
+
+浏览器访问宿主机端口 `18080`。容器内运行 Gunicorn，监听 `8000`，启动时会先执行迁移。上面的 `QSCORE_COOKIE_SECURE=0` 用于本地 HTTP。通过 HTTPS 部署时使用默认的安全 Cookie 设置，并在 `QSCORE_ALLOWED_HOSTS` 中配置访问域名。
+
+如果数据库中还没有管理员，可以在容器里创建。
+
+```bash
+docker exec -it qscore-dev python manage.py createsuperuser --username admin
+```
+
 ## 评分规则
 
 - 支持单行文本、文本框、单选框、下拉单选、下拉多选、复选框和数字。评语用文本框收集，数字可配置范围和 0～6 位小数。
