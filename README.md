@@ -84,4 +84,22 @@ docker exec -it qscore-dev python manage.py createsuperuser --username admin
 
 可以用 `QSCORE_CONFIG` 指定配置文件路径。配置文件中的值优先，缺省项可通过 `QSCORE_DB_*`、`QSCORE_SECRET_KEY` 和 `QSCORE_DEBUG` 环境变量提供。默认时区为 `Asia/Singapore`，可用 `QSCORE_TIME_ZONE` 设置。
 
+### 从 Nacos 读取配置
+
+部署时设置 `QSCORE_NACOS_URL`，例如 `http://nacos.internal:8848`，QScore 启动时就会从 Nacos 读取配置。默认读取公共命名空间下 `DEFAULT_GROUP` 的 `simtek_qscore.yaml`。可用 `QSCORE_NACOS_NAMESPACE`、`QSCORE_NACOS_GROUP` 和 `QSCORE_NACOS_DATA_ID` 调整读取位置。
+
+```yaml
+app:
+  debug: false
+database:
+  host: mysql.internal
+  port: 3306
+  name: qscore
+  user: qscore
+```
+
+通过部署环境提供 `QSCORE_DB_PASSWORD` 和 `QSCORE_SECRET_KEY`。设置 `QSCORE_NACOS_URL` 后，数据库地址等设置以 Nacos 为准。更新配置后重启服务即可读取新版，启动时读取或校验失败会退出。
+
+### 正式部署
+
 正式部署时，将 `[app].debug` 设为 `false`，通过 `QSCORE_ALLOWED_HOSTS` 配置访问域名，并启用 HTTPS。运行 `.venv/bin/python manage.py collectstatic` 后，由 Web 服务器提供 `/static/`。可将启动 `qscore.wsgi:application` 的命令传给 `./start.sh`，脚本会先执行迁移。

@@ -1,16 +1,12 @@
 import os
-import tomllib
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
 
+from .config import load_config
+
 BASE_DIR = Path(__file__).resolve().parent.parent
-config_override = os.getenv("QSCORE_CONFIG")
-config_path = Path(config_override) if config_override else BASE_DIR / "qscore.local.toml"
-config = {}
-if config_override or config_path.is_file():
-    with config_path.open("rb") as config_file:
-        config = tomllib.load(config_file)
+config = load_config(BASE_DIR)
 
 app_config = config.get("app", {})
 database_config = config.get("database", {})
