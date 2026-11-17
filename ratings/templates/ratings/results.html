@@ -1,0 +1,35 @@
+{% extends "ratings/base.html" %}
+{% block title %}评分结果 · QScore{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'activities' %}">← 评分活动</a>
+<header class="page-header"><div><h1>评分结果</h1><p>{{ activity.name }} · {{ activity.year }} 年 {{ activity.get_quarter_display }}</p></div></header>
+{% include "ratings/activity_tabs.html" %}
+<section class="panel">
+  <form class="filters" method="get">
+    {% include "ratings/fields.html" with fields=form %}
+    <button class="button">筛选</button><a class="text-link" href="{% url 'results' activity.id %}">清空</a>
+    <button class="button primary export" name="export" value="xlsx">导出 Excel</button>
+  </form>
+  <div class="table-scroll"><table>
+    <thead><tr><th>员工</th><th>部门与岗位</th><th>有效评价数</th><th>综合分</th>{% for item in items %}<th>{{ item.name }}</th>{% endfor %}</tr></thead>
+    <tbody>
+      {% for row in rows %}<tr>
+        <td class="strong">{{ row.target__name }}</td><td>{{ row.target__department }}<small class="cell-note">{{ row.target__position }}</small></td>
+        <td>{{ row.count }}</td><td>{% if row.total != None %}<strong class="accent-text">{{ row.total|floatformat:2 }}</strong>{% else %}<span class="muted">暂无评分</span>{% endif %}</td>
+        {% for value in row.averages %}<td>{{ value|floatformat:2 }}</td>{% endfor %}
+      </tr>{% empty %}<tr><td class="empty" colspan="{{ items|length|add:4 }}">暂无符合条件的评分结果。</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+<section class="panel">
+  <header class="panel-title"><h2>部门统计</h2></header>
+  <div class="table-scroll"><table>
+    <thead><tr><th>部门</th><th>参与人数</th><th>已有评分人数</th><th>部门平均分</th></tr></thead>
+    <tbody>
+      {% for row in departments %}<tr><td>{{ row.name|default:"未设置部门" }}</td><td>{{ row.participants }}</td><td>{{ row.scored }}</td>
+        <td>{% if row.total != None %}{{ row.total|floatformat:2 }}{% else %}暂无评分{% endif %}</td></tr>
+      {% empty %}<tr><td class="empty" colspan="4">暂无部门统计。</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}

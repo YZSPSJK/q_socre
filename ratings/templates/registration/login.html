@@ -1,0 +1,16 @@
+{% extends "ratings/base.html" %}
+{% block title %}登录 · QScore{% endblock %}
+{% block content %}
+<section class="login">
+  <div class="login-brand"><span class="brand-mark" aria-hidden="true">Q</span><span>QScore</span></div>
+  <div class="login-form">
+    <header><h1>登录</h1><p>使用公司分配的 QScore 账号进入评分工作台。</p></header>
+    <form method="post">
+      {% csrf_token %}
+      {% include "ratings/fields.html" with fields=form %}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      <button type="submit" class="button primary">登录</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

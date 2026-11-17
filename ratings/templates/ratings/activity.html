@@ -1,0 +1,49 @@
+{% extends "ratings/base.html" %}
+{% block title %}{{ activity.name }} · QScore{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'activities' %}">← 评分活动</a>
+<header class="page-header">
+  <div><h1>{{ activity.name }}</h1><p>{{ activity.year }} 年 · {{ activity.get_quarter_display }} <span class="badge">{{ activity.phase }}</span></p></div>
+  <a class="button" href="{% url 'edit_activity' activity.id %}">编辑配置</a>
+</header>
+{% include "ratings/activity_tabs.html" %}
+<div class="two-columns">
+  <section class="panel padded">
+    <h2>活动配置</h2>
+    <dl class="info-list">
+      <dt>开始时间</dt><dd>{{ activity.starts_at|date:"Y-m-d H:i" }}</dd>
+      <dt>截止时间</dt><dd>{{ activity.ends_at|date:"Y-m-d H:i" }}</dd>
+      <dt>评分模板</dt><dd>{{ activity.template.name }}{% if activity.activated_at %} · 已固定{% endif %}</dd>
+      <dt>有效评分关系</dt><dd>{{ task_count }}</dd>
+      <dt>自评</dt><dd>{% if activity.allow_self %}允许{% if activity.count_self %}，计入结果{% else %}，只保留记录{% endif %}{% else %}关闭{% endif %}</dd>
+    </dl>
+    <form method="post" action="{% url 'activity_action' activity.id %}">
+      {% csrf_token %}
+      {% if activity.enabled %}<button class="button danger" name="action" value="disable">停用活动</button>
+      {% else %}<button class="button primary" name="action" value="enable">启用活动</button>{% endif %}
+    </form>
+  </section>
+  <section class="panel padded">
+    <h2>员工查看结果</h2>
+    <dl class="info-list">
+      <dt>查看开关</dt><dd><span class="badge {% if activity.results_open %}positive{% endif %}">{% if activity.results_open %}已开放{% else %}未开放{% endif %}</span></dd>
+      <dt>内容范围</dt><dd>{{ activity.get_visibility_display }}</dd>
+      {% if activity.visibility == 'dimensions' %}
+        <dt>逐条评价</dt><dd>{% if activity.show_reviews %}{% if activity.anonymous %}匿名显示{% else %}实名显示{% endif %}{% else %}关闭{% endif %}</dd>
+      {% endif %}
+    </dl>
+    <form method="post" action="{% url 'activity_action' activity.id %}">
+      {% csrf_token %}
+      {% if activity.results_open %}<button class="button" name="action" value="close_results">关闭结果查看</button>
+      {% else %}<button class="button primary" name="action" value="open_results">开放评分结果</button>{% endif %}
+    </form>
+  </section>
+</div>
+<section class="panel">
+  <header class="panel-title"><h2>评分维度</h2></header>
+  <div class="table-scroll"><table><thead><tr><th>评分项</th><th>表单类型</th><th>权重</th><th>填写要求</th></tr></thead>
+    <tbody>{% for item in items %}<tr><td class="strong">{{ item.name }}</td><td>{{ item.get_field_type_display }}</td><td>{% if item.scored %}{{ item.weight|floatformat:"-2" }}%{% else %}不计分{% endif %}</td><td>{{ item.required|yesno:"必填,选填" }}</td></tr>
+      {% empty %}<tr><td class="empty" colspan="4">暂无评分维度。</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

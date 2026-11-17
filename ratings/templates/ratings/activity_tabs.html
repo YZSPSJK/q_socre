@@ -1,0 +1,8 @@
+{% with route=request.resolver_match.url_name %}
+<nav class="tabs" aria-label="活动操作">
+  <a href="{% url 'activity_detail' activity.id %}" {% if route == 'activity_detail' %}aria-current="page"{% endif %}>活动概览</a>
+  <a href="{% url 'relationships' activity.id %}" {% if route == 'relationships' %}aria-current="page"{% endif %}>评分关系</a>
+  <a href="{% url 'progress' activity.id %}" {% if route == 'progress' %}aria-current="page"{% endif %}>进度跟踪</a>
+  <a href="{% url 'results' activity.id %}" {% if route == 'results' %}aria-current="page"{% endif %}>评分结果</a>
+</nav>
+{% endwith %}

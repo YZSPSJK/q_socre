@@ -1,0 +1,43 @@
+{% extends "ratings/base.html" %}
+{% block title %}评分表单 · QScore{% endblock %}
+{% block content %}
+<a class="back" href="{% if manager %}{% url 'relationships' task.activity.id %}{% else %}{% url 'my_tasks' %}{% endif %}">← {% if manager %}评分关系{% else %}我的评分任务{% endif %}</a>
+<header class="page-header">
+  <div><h1>{{ task.target.name }}</h1><p>{{ task.activity.name }}{% if task.target.department %} · {{ task.target.department }}{% endif %}{% if task.target.position %} · {{ task.target.position }}{% endif %}</p></div>
+  <span class="badge {% if task.status == 'submitted' %}positive{% elif task.status == 'returned' %}warning{% endif %}">{% if not task.active %}已取消 · {% endif %}{{ task.get_status_display }}</span>
+</header>
+{% if manager %}<p class="notice">评分人：{{ task.reviewer.name }}{% if task.submitted_at %} · 提交时间：{{ task.submitted_at|date:"Y-m-d H:i" }}{% endif %}</p>{% endif %}
+{% if editable and not can_submit %}<p class="notice">当前不在正式评分时段内，可保存草稿。</p>{% endif %}
+{% if not manager and task.status == 'returned' %}<p class="notice warning">此评分已退回，请修改评分后重新提交。</p>{% endif %}
+{% if not manager and not task.activity.enabled %}<p class="notice">活动已停用，评分记录只读。</p>{% endif %}
+{% if editable %}<form class="panel padded" method="post" data-score-form novalidate>{% csrf_token %}
+{% else %}<section class="panel padded">{% endif %}
+  <div class="split heading-row score-heading">
+    <h2>评分表</h2>
+    {% if editable %}<div class="total-box"><span>综合分预览</span><strong data-score-preview>0.00</strong></div>
+    {% elif task.total != None %}<div class="total-box"><span>综合分</span><strong>{{ task.total|floatformat:2 }}</strong></div>{% endif %}
+  </div>
+  {{ form.non_field_errors }}
+  <div class="score-list">
+    {% for item, field, ceiling, scores in form.item_fields %}
+      <fieldset class="score-row {% if item.numeric %}score-numeric{% endif %}" data-answer-row {% if item.required %}data-required-answer{% endif %} {% if item.scored %}data-score-item data-weight="{{ item.weight }}" data-maximum="{{ ceiling }}" data-option-scores="{{ scores }}"{% endif %}>
+        <div>
+          {{ field.label_tag }}
+          <small>{% if item.numeric %}{{ item.minimum|floatformat:"-6" }} 至 {{ item.maximum|floatformat:"-6" }} · 最多 {{ item.precision }} 位小数 · {% endif %}{% if item.scored %}权重 {{ item.weight|floatformat:"-2" }}% · {% endif %}{{ item.required|yesno:"必填,选填" }}</small>
+          {% if field.help_text %}<small id="{{ field.auto_id }}_helptext">{{ field.help_text }}</small>{% endif %}
+        </div>
+        <div class="field score-answer">{{ field }}{{ field.errors }}<small class="answer-error" data-answer-error role="alert"></small></div>
+      </fieldset>
+    {% empty %}<p class="muted">活动启用后生成评分表。</p>{% endfor %}
+  </div>
+  {% if editable %}<div class="form-actions">
+    <button class="button" name="action" value="draft">保存草稿</button>
+    {% if can_submit %}<button class="button primary" name="action" value="submit">正式提交</button>{% endif %}
+  </div>{% endif %}
+{% if editable %}</form>{% else %}</section>{% endif %}
+{% if manager and task.active and task.status == 'submitted' %}
+  <form method="post" action="{% url 'task_action' task.activity.id task.id %}" class="form-actions">
+    {% csrf_token %}<button class="button danger" name="action" value="return" data-confirm="退回这条评分？重新提交前将暂停计入结果。">退回重评</button>
+  </form>
+{% endif %}
+{% endblock %}

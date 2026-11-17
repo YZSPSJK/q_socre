@@ -1,0 +1,32 @@
+<fieldset class="template-item" data-item-config>
+  {% for hidden in item.hidden_fields %}{{ hidden }}{% endfor %}
+  {{ item.ORDER.errors }}
+  <span hidden>{{ item.DELETE }}</span>
+  {{ item.non_field_errors }}
+  <div class="item-fields">
+    {% for field in item.visible_fields %}
+      {% if field.name != "DELETE" %}
+        <div class="field {% if field.name == 'required' or field.name == 'counts_for_score' %}check-field{% endif %}" data-config-field="{{ field.name }}">
+          {% if field.name == 'required' or field.name == 'counts_for_score' %}{{ field }}{{ field.label_tag }}{% else %}{{ field.label_tag }}{{ field }}{% endif %}
+          {% if field.name == "default_value" %}<small data-choice-default-hint hidden>填选项名称，多选时每行一个。</small>{% endif %}
+          {{ field.errors }}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <div class="option-config" data-item-options>
+    <div class="split heading-row">
+      <strong>选项配置</strong>
+      <button type="button" class="button" data-add-option>添加选项</button>
+    </div>
+    {{ item.options.errors }}
+    <div data-option-list></div>
+    <template data-option-template>
+      <div class="option-row">
+        <label class="field">选项名称<input type="text" maxlength="200" data-option-label></label>
+        <label class="field" data-option-points>分数<input type="number" min="0" step="0.000001" data-option-score></label>
+        <button type="button" class="text-link danger-text" data-remove-option>移除选项</button>
+      </div>
+    </template>
+  </div>
+</fieldset>

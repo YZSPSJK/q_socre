@@ -1,0 +1,28 @@
+{% extends "ratings/base.html" %}
+{% block title %}评分模板 · QScore{% endblock %}
+{% block content %}
+<header class="page-header">
+  <div><h1>评分模板</h1><p>定义评分维度、分值与权重，供评分活动复用。</p></div>
+  <a class="button primary" href="{% url 'new_template' %}"><span aria-hidden="true">＋</span> 新建模板</a>
+</header>
+<section class="panel">
+  <div class="table-scroll"><table>
+    <thead><tr><th>模板名称</th><th>评分维度</th><th>操作</th></tr></thead>
+    <tbody>
+      {% for template in templates %}
+      <tr>
+        <td class="strong">{{ template.name }}</td>
+        <td>{% for item in template.items.all %}<span class="badge">{{ item.name }} · {% if item.scored %}{{ item.weight|floatformat:"-2" }}%{% else %}{{ item.get_field_type_display }}{% endif %}</span> {% endfor %}</td>
+        <td><div class="row-actions">
+          <a class="text-link" href="{% url 'edit_template' template.id %}">编辑</a>
+          <form method="post" action="{% url 'template_action' template.id %}">{% csrf_token %}
+            <button class="text-link" name="action" value="copy">复制</button>
+            <button class="text-link danger-text" name="action" value="delete" data-confirm="删除此评分模板？">删除</button>
+          </form>
+        </div></td>
+      </tr>
+      {% empty %}<tr><td colspan="3" class="empty">暂无模板。先添加评分项和权重，再创建活动。</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}

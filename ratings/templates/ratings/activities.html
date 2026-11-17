@@ -1,0 +1,24 @@
+{% extends "ratings/base.html" %}
+{% block title %}评分活动 · QScore{% endblock %}
+{% block content %}
+<header class="page-header">
+  <div><h1>评分活动</h1><p>管理季度活动，配置人员与规则，跟踪评分进度。</p></div>
+  <a class="button primary" href="{% url 'new_activity' %}"><span aria-hidden="true">＋</span> 新建活动</a>
+</header>
+<section class="panel">
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>活动名称</th><th>所属季度</th><th>评分时段</th><th>状态</th><th>员工结果</th><th>操作</th></tr></thead>
+      <tbody>
+        {% for activity in activities %}
+          <tr><td class="strong">{{ activity.name }}</td><td>{{ activity.year }} · {{ activity.get_quarter_display }}</td>
+            <td class="subtle tabular">{{ activity.starts_at|date:"Y-m-d H:i" }}<br>{{ activity.ends_at|date:"Y-m-d H:i" }}</td>
+            <td><span class="badge {% if activity.phase == '评分中' %}positive{% endif %}">{{ activity.phase }}</span></td>
+            <td>{% if activity.results_open %}已开放{% else %}未开放{% endif %}</td>
+            <td><a class="text-link" href="{% url 'activity_detail' activity.id %}">详情</a></td></tr>
+        {% empty %}<tr><td class="empty" colspan="6">暂无评分活动。创建活动后即可关联模板与人员。</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

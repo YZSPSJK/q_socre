@@ -1,0 +1,12 @@
+{% extends "ratings/base.html" %}
+{% block title %}{% if activity %}编辑活动{% else %}新建活动{% endif %} · QScore{% endblock %}
+{% block content %}
+<a class="back" href="{% if activity %}{% url 'activity_detail' activity.id %}{% else %}{% url 'activities' %}{% endif %}">← {% if activity %}活动概览{% else %}评分活动{% endif %}</a>
+<header class="page-header"><div><h1>{% if activity %}编辑活动{% else %}新建活动{% endif %}</h1><p>设置季度、评分时段和员工可见范围。</p></div></header>
+{% if not form.template.field.queryset and not activity %}<p class="notice">请先<a class="text-link" href="{% url 'new_template' %}">创建评分模板</a>。</p>{% endif %}
+<form class="panel padded form-panel" method="post">
+  {% csrf_token %}
+  <div class="field-grid">{% include "ratings/fields.html" with fields=form %}</div>
+  <div class="form-actions"><button class="button primary" type="submit">保存活动</button><a class="button" href="{% if activity %}{% url 'activity_detail' activity.id %}{% else %}{% url 'activities' %}{% endif %}">返回</a></div>
+</form>
+{% endblock %}

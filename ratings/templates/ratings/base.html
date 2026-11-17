@@ -1,0 +1,51 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}QScore{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'ratings/app.css' %}">
+  <script src="{% static 'ratings/app.js' %}" defer></script>
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="{% url 'home' %}"><span class="brand-mark" aria-hidden="true">Q</span> QScore</a>
+    <nav class="side-nav" aria-label="主菜单">
+      {% if user.can_manage_ratings %}
+        <p class="side-label">评分管理</p>
+        {% with route=request.resolver_match.url_name %}
+          <a class="{% if 'activity' in route or route == 'activities' or route == 'progress' or route == 'results' or route == 'relationships' or route == 'review_task' %}selected{% endif %}" href="{% url 'activities' %}">评分活动</a>
+          <a class="{% if 'template' in route %}selected{% endif %}" href="{% url 'templates' %}">评分模板</a>
+        {% endwith %}
+      {% endif %}
+      <p class="side-label">个人工作台</p>
+      <a class="{% if request.resolver_match.url_name == 'my_tasks' or request.resolver_match.url_name == 'score_task' %}selected{% endif %}" href="{% url 'my_tasks' %}">我的评分任务</a>
+      <a class="{% if 'my_result' in request.resolver_match.url_name %}selected{% endif %}" href="{% url 'my_results' %}">我的评分结果</a>
+      {% if user.is_superuser %}
+        <p class="side-label">系统</p>
+        <a href="{% url 'admin:ratings_user_changelist' %}">账号管理</a>
+      {% endif %}
+    </nav>
+    <div class="account">
+      <div class="avatar" aria-hidden="true">{{ user.display_name|first|upper }}</div>
+      <div><strong>{{ user.display_name }}</strong><small>{% if user.is_superuser %}系统管理员{% else %}{{ user.get_role_display }}{% endif %}</small></div>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="logout">退出</button></form>
+    </div>
+  </aside>
+  <main class="workspace" id="content">
+{% else %}
+  <main class="entry" id="content">
+{% endif %}
+    {% if messages %}
+      <div class="notices" aria-live="polite">
+        {% for message in messages %}<div class="notice {{ message.tags }}">{{ message }}</div>{% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+{% if user.is_authenticated %}</div>{% endif %}
+</body>
+</html>

@@ -1,0 +1,10 @@
+[app]
+secret_key = ""
+debug = true
+
+[database]
+host = "127.0.0.1"
+port = 3306
+name = "qscore"
+user = "qscore"
+password = ""

@@ -1,0 +1,30 @@
+{% extends "ratings/base.html" %}
+{% block title %}评分结果详情 · QScore{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'my_results' %}">← 我的评分结果</a>
+<header class="page-header"><div><h1>{{ activity.name }}</h1><p>{{ activity.year }} 年 · {{ activity.get_quarter_display }}</p></div></header>
+<div class="metrics">
+  <div class="metric accent"><span>综合分</span><strong>{% if total != None %}{{ total|floatformat:2 }}{% else %}暂无评分{% endif %}</strong></div>
+  {% if show_details %}<div class="metric"><span>有效评价数</span><strong>{{ count }}</strong></div>{% endif %}
+</div>
+{% if show_details %}
+<section class="panel">
+  <header class="panel-title"><h2>各维度平均分</h2></header>
+  <div class="table-scroll"><table><thead><tr><th>维度</th><th>满分</th><th>平均分</th></tr></thead><tbody>
+    {% for item, maximum, average in averages %}<tr><td>{{ item.name }}</td><td>{{ maximum|floatformat:"-6" }}</td><td>{% if average != None %}{{ average|floatformat:2 }}{% else %}暂无评分{% endif %}</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endif %}
+{% if reviews %}
+<section class="panel">
+  <header class="panel-title"><h2>逐条评价</h2></header>
+  <div class="table-scroll"><table>
+    <thead><tr><th>评分人</th><th>综合分</th><th>各项回答</th></tr></thead>
+    <tbody>{% for review in reviews %}<tr>
+      <td>{{ review.name|default:"匿名" }}</td><td>{{ review.total|floatformat:2 }}</td>
+      <td class="comment-text">{% for name, value in review.answers %}<div><strong>{{ name }}</strong>：{% if value != None %}{{ value|linebreaksbr }}{% else %}未填写{% endif %}</div>{% endfor %}</td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endif %}
+{% endblock %}

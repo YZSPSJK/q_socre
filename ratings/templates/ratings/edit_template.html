@@ -1,0 +1,59 @@
+{% extends "ratings/base.html" %}
+{% block title %}{% if score_template.pk %}编辑模板{% else %}新建模板{% endif %} · QScore{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'templates' %}">← 评分模板</a>
+<header class="page-header"><div><h1>{% if score_template.pk %}编辑模板{% else %}新建模板{% endif %}</h1><p>按题目配置输入方式。参与计分的评分项权重合计为 100%。</p></div></header>
+<form class="panel padded" method="post" data-template-form novalidate>
+  {% csrf_token %}
+  <div class="single-field">{% include "ratings/fields.html" with fields=form %}</div>
+  {{ items.management_form }}
+  {{ items.non_form_errors }}
+  <section class="panel template-dimensions" aria-labelledby="template-dimensions-title">
+    <div class="split panel-title">
+      <h2 id="template-dimensions-title">评分维度</h2>
+      <button type="button" class="button" data-add-item>＋ 添加评分项</button>
+    </div>
+    <div class="table-scroll"><table>
+      <thead><tr><th scope="col">排序</th><th scope="col">名称</th><th scope="col">表单类型</th><th scope="col">必填</th><th scope="col">权重</th><th scope="col">操作</th></tr></thead>
+      <tbody data-item-rows></tbody>
+    </table></div>
+    <div class="template-weight" aria-live="polite">权重合计 <strong data-total-weight>0%</strong></div>
+  </section>
+  <div data-item-list hidden>
+    {% if items.is_bound or items.initial_form_count %}
+      {% for item in items %}{% include "ratings/item_fields.html" %}{% endfor %}
+    {% endif %}
+  </div>
+  <template data-item-template>{% include "ratings/item_fields.html" with item=items.empty_form %}</template>
+  <template data-item-row>
+    <tr>
+      <td><div class="item-order">
+        <span class="item-handle" data-item-handle draggable="true" title="拖拽排序" aria-hidden="true">⠿</span>
+        <button type="button" class="text-link" data-move-up title="上移">↑</button>
+        <button type="button" class="text-link" data-move-down title="下移">↓</button>
+      </div></td>
+      <td><span class="strong" data-item-name></span><small class="cell-note danger-text" data-item-error hidden>配置有误，请编辑</small></td>
+      <td><span class="badge" data-item-type></span></td>
+      <td data-item-required></td>
+      <td data-item-weight></td>
+      <td><div class="row-actions">
+        <button type="button" class="text-link" data-edit-item>编辑</button>
+        <button type="button" class="text-link danger-text" data-remove-item>移除</button>
+      </div></td>
+    </tr>
+  </template>
+  <template data-item-empty><tr><td colspan="6" class="empty">还没有评分项。</td></tr></template>
+  <dialog class="item-drawer" data-item-drawer aria-labelledby="item-drawer-title">
+    <header class="split item-drawer-header">
+      <h2 id="item-drawer-title" data-item-drawer-title>编辑评分项</h2>
+      <button type="button" class="button" data-cancel-item aria-label="关闭">×</button>
+    </header>
+    <div class="item-drawer-body" data-item-drawer-body></div>
+    <footer class="item-drawer-footer">
+      <button type="button" class="button" data-cancel-item>取消</button>
+      <button type="button" class="button primary" data-apply-item>确定</button>
+    </footer>
+  </dialog>
+  <div class="form-actions"><button class="button primary" type="submit">保存模板</button><a class="button" href="{% url 'templates' %}">返回</a></div>
+</form>
+{% endblock %}
