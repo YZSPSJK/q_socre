@@ -62,10 +62,16 @@ def load_nacos_config(server):
     app = config.get("app", {})
     if not isinstance(app, dict) or ("debug" in app and type(app["debug"]) is not bool):
         raise ImproperlyConfigured("Nacos 配置中的 app.debug 必须为 true 或 false。")
-    for name in ("QSCORE_SECRET_KEY", "QSCORE_DB_PASSWORD"):
-        if not os.getenv(name):
-            raise ImproperlyConfigured(f"Nacos 模式需要通过环境变量提供 {name}。")
+    secret_key = app.get("secret_key", os.getenv("QSCORE_SECRET_KEY"))
+    if not isinstance(secret_key, str) or not secret_key.strip():
+        raise ImproperlyConfigured("请在 Nacos 中配置非空的 app.secret_key。")
+    password = database.get("password", os.getenv("QSCORE_DB_PASSWORD"))
+    if not isinstance(password, str) or not password.strip():
+        raise ImproperlyConfigured("请在 Nacos 中配置非空的 database.password。")
     return {
-        "app": {"debug": app.get("debug", False)},
-        "database": {field: database[field] for field in ("host", "port", "name", "user")},
+        "app": {"debug": app.get("debug", False), "secret_key": secret_key},
+        "database": {
+            "host": database["host"], "port": port, "name": database["name"],
+            "user": database["user"], "password": password,
+        },
     }

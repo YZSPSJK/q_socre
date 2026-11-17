@@ -91,14 +91,16 @@ docker exec -it qscore-dev python manage.py createsuperuser --username admin
 ```yaml
 app:
   debug: false
+  secret_key: "填写 Django 应用密钥"
 database:
   host: mysql.internal
   port: 3306
   name: qscore
   user: qscore
+  password: "填写数据库密码"
 ```
 
-通过部署环境提供 `QSCORE_DB_PASSWORD` 和 `QSCORE_SECRET_KEY`。设置 `QSCORE_NACOS_URL` 后，数据库地址等设置以 Nacos 为准。更新配置后重启服务即可读取新版，启动时读取或校验失败会退出。
+Nacos 模式直接读取上述配置。已有部署也可通过 `QSCORE_DB_PASSWORD` 和 `QSCORE_SECRET_KEY` 补齐 YAML 中省略的密钥字段。更新配置后重启服务即可读取新版，启动时读取或校验失败会退出。
 
 ### 正式部署
 
